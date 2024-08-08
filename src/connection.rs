@@ -1,7 +1,9 @@
-use bytes::{BytesMut, Bytes};
+use bytes::BytesMut;
 use tokio::net::TcpStream;
 use tokio::io::AsyncReadExt;
+use bytes::Buf;
 use mini_redis::Result;
+use mini_redis::Frame;
 
 enum Frame {
   Simple(String),
@@ -31,22 +33,14 @@ impl Connection {
         return Ok(Some(frame));
       }
 
-      // 0 indicates that no more data will be received from the peer.
       if 0 == self.stream.read_buf(&mut self.buffer).await? {
-        if self.buffer.is_empty() {
-          return Ok(None);
-        } else {
-          return Err("connection reset by peer".into());
-        }
+
       }
     }
   }
 
-  fn parse_from(&self) -> Option<Frame> {
-    None
+  fn parse_from() -> Option<Frame> {
+
   }
 }
 
-fn main() {
-
-}
