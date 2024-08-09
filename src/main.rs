@@ -14,14 +14,16 @@ enum Frame {
 
 pub struct Connection {
   stream: TcpStream,
-  buffer: BytesMut,
+  buffer: Vec<u8>,
+  cursor: usize,
 }
 
 impl Connection {
   pub fn new(stream: TcpStream) -> Self {
     Self {
       stream,
-      buffer: BytesMut::with_capacity(4096),
+      buffer: vec![0; 4096],
+      cursor: 0,
     }
   }
 
@@ -32,18 +34,22 @@ impl Connection {
       }
 
       // 0 indicates that no more data will be received from the peer.
-      if 0 == self.stream.read_buf(&mut self.buffer).await? {
+      let n = self.stream.read(&mut self.buffer[self.cursor..]).await?;
+
+      if 0 == n {
         if self.buffer.is_empty() {
           return Ok(None);
         } else {
           return Err("connection reset by peer".into());
         }
+      } else {
+        self.cursor += n;
       }
     }
   }
 
   fn parse_from(&self) -> Option<Frame> {
-    None
+    todo!()
   }
 }
 
